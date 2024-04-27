@@ -42,7 +42,7 @@ function rehypeInlineCodeProperty() {
 }
 
 const MarkdownBlock: React.FC<ChatBlockProps> = ({markdown, role, loading}) => {
-  console.log('markdown',markdown)
+  // console.log('markdown',markdown)
   const {userSettings, setUserSettings} = useContext(UserContext);
 
   function inlineCodeBlock({value, language}: { value: string; language: string | undefined }) {
