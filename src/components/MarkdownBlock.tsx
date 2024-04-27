@@ -108,15 +108,8 @@ const MarkdownBlock: React.FC<ChatBlockProps> = ({markdown, role, loading}) => {
  
 
         </ReactMarkdown>
-        {markdown }
+        <div dangerouslySetInnerHTML={{ __html: markdown }}></div>
           
-          {image && (
-            <AvatarFieldEditor 
-              image={imageSource} 
-              readOnly={true} // Set readOnly to true if you just want to display the image
-              size={120} 
-            />
-          )}
         {loading && <span className="streaming-dot">•••</span>}
       </div>
   );

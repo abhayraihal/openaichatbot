@@ -106,7 +106,7 @@ const ChatBlock: React.FC<Props> = ({block, loading, isLastBlock}) => {
                           ></textarea>
                       )
                       : (
-                          <div ref={contentRef}
+                          <div ref={contentRef} id="content-block"
                                className="markdown prose w-full break-words dark:prose-invert light">
                             {block.role === 'user' ? (
                                 <UserContentBlock text={block.content} fileDataRef={(block.fileDataRef) ? block.fileDataRef : []}/>
