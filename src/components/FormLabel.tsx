@@ -13,7 +13,7 @@ const FormLabel: React.FC<FormLabelProps> = ({readOnly, isEditing, label, htmlFo
   const className = !isModalLabel ? "block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" : "";
 
   return readOnly || !isEditing ? (
-      <span className={className}>{label}</span>
+      <span className={className}></span>
   ) : (
       <label className={className} htmlFor={htmlFor}>{label}</label>
   );

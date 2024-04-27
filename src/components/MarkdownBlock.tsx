@@ -14,12 +14,19 @@ import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import {UserContext} from "../UserContext";
 import {coldarkDark, oneLight} from 'react-syntax-highlighter/dist/esm/styles/prism'
+import AvatarFieldEditor, {ImageSource} from "./AvatarFieldEditor";
+import image from './image.jpg';
 
 interface ChatBlockProps {
   markdown: string;
   role: string;
   loading: boolean;
 }
+
+const imageSource: ImageSource = {
+  data: image,
+  type: 'png' // Specify the correct type based on the image being provided
+};
 
 function rehypeInlineCodeProperty() {
   return function (tree: Root): void {
@@ -35,6 +42,7 @@ function rehypeInlineCodeProperty() {
 }
 
 const MarkdownBlock: React.FC<ChatBlockProps> = ({markdown, role, loading}) => {
+  console.log('markdown',markdown)
   const {userSettings, setUserSettings} = useContext(UserContext);
 
   function inlineCodeBlock({value, language}: { value: string; language: string | undefined }) {
@@ -95,8 +103,20 @@ const MarkdownBlock: React.FC<ChatBlockProps> = ({markdown, role, loading}) => {
             components={renderers}
             rehypePlugins={[rehypeKatex, rehypeInlineCodeProperty]}
         >
-          {markdown}
+
+        
+ 
+
         </ReactMarkdown>
+        {markdown }
+          
+          {image && (
+            <AvatarFieldEditor 
+              image={imageSource} 
+              readOnly={true} // Set readOnly to true if you just want to display the image
+              size={120} 
+            />
+          )}
         {loading && <span className="streaming-dot">•••</span>}
       </div>
   );

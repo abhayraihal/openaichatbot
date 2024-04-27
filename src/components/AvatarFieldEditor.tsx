@@ -94,7 +94,7 @@ const AvatarFieldEditor: React.FC<AvatarFieldEditorProps> = ({
               <img
                   src={imageSrc.data}
                   alt="User Avatar"
-                  style={{width: `${size}px`, height: `${size}px`, borderRadius: '50%', objectFit: 'cover'}}
+                  style={{objectFit: 'cover'}}
               />
           ) : (
               <div

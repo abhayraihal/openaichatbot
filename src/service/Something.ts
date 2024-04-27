@@ -11,6 +11,8 @@ import { read } from "fs";
 import { decode } from "punycode";
 
 interface CompletionChunk {
+  image: any;
+  message: string;
   id: string;
   object: string;
   created: number;
@@ -24,6 +26,34 @@ interface CompletionChunkChoice {
     content: string;
   };
   finish_reason: null | string; // If there can be other values than 'null', use appropriate type instead of string.
+}
+function base64ToBlob(base64: string, contentType: string): Blob {
+  const byteCharacters = atob(base64);
+  const byteArrays: Uint8Array[] = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+      const slice = byteCharacters.slice(offset, offset + 512);
+      const byteNumbers = new Array(slice.length);
+
+      for (let i = 0; i < slice.length; i++) {
+          byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+  }
+
+  return new Blob(byteArrays, { type: contentType });
+}
+
+function createBlobImageElement(blob: Blob): HTMLImageElement {
+  const imgElement = document.createElement('img');
+  const imageUrl = URL.createObjectURL(blob);
+  imgElement.src = imageUrl;
+  imgElement.onload = () => {
+      URL.revokeObjectURL(imageUrl); // Revoke the Blob URL after image has loaded
+  };
+  return imgElement;
 }
 
 
@@ -173,7 +203,7 @@ export class Something {
   
       let response: Response;
 
-      console.log(requestBody.messages)
+      // console.log(requestBody.messages)
 
 
       const requestBodynew = {
@@ -222,11 +252,11 @@ export class Something {
         return; // Early return if the fetch was aborted
       }
 
-      console.log(response)
+      // console.log('x',response)
   
       if (response.body) {
-        console.log("hsha")
         // Read the response as a stream of data
+        // console.log('response.body', response.body)
         const reader = response.body.getReader();
 
         const decoder = new TextDecoder("utf-8");
@@ -242,14 +272,13 @@ export class Something {
             let DONE = false;
             let decodedChunk = decoder.decode(value);
 
-            console.log(decodedChunk)
+            // console.log(decodedChunk)
             
             if (partialDecodedChunk) {
               decodedChunk = "data: " + partialDecodedChunk + decodedChunk;
               partialDecodedChunk = undefined;
 
             }
-            console.log(decodedChunk)
             
             const rawData = decodedChunk.split("data: ").filter(Boolean);  // Split on "data: " and remove any empty strings
             const chunks: CompletionChunk[] = rawData.map((chunk, index) => {
@@ -277,22 +306,42 @@ export class Something {
   
             let accumulatedContet = '';
             chunks.forEach(chunk => {
-              chunk.choices.forEach(choice => {
-                if (choice.delta && choice.delta.content) {  // Check if delta and content exist
-                  const content = choice.delta.content;
-                  try {
-                    accumulatedContet += content;
-                  } catch (err) {
-                    if (err instanceof Error) {
-                      console.error(err.message);
-                    }
-                    console.log('error in client. continuing...')
-                  }
-                } else if (choice?.finish_reason === 'stop') {
-                  // done
-                }
-              });
+              console.log('chunk',chunk)
+              accumulatedContet += chunk.message;
+
+            // Convert base64 image to Blob
+            const base64String = chunk.image;
+            const contentType = "image/jpeg"; // Adjust based on your image type
+            const blob = base64ToBlob(base64String, contentType);
+
+            // Create image element
+            const imgElement = createBlobImageElement(blob);
+
+            // Create a container (e.g., <div>) for the image
+            const imageContainer = document.createElement('div');
+            imageContainer.appendChild(imgElement); // Append image element to container
+
+            // Append container's HTML to accumulated content
+            // accumulatedContet += imageContainer.outerHTML;
+              
+
+              // chunk.choices.forEach(choice => {
+              //   if (choice.delta && choice.delta.content) {  // Check if delta and content exist
+              //     const content = choice.delta.content;
+              //     try {
+              //       accumulatedContet += content;
+              //     } catch (err) {
+              //       if (err instanceof Error) {
+              //         console.error(err.message);
+              //       }
+              //       console.log('error in client. continuing...')
+              //     }
+              //   } else if (choice?.finish_reason === 'stop') {
+              //     // done
+              //   }
+              // });
             });
+
             debouncedCallback(accumulatedContet);
   
             if (DONE) {
@@ -339,10 +388,10 @@ export class Something {
       } catch (error: unknown) {
         if (error instanceof Error) {
           console.error('Failed to get models:', error.message);
-          throw new CustomError('Error retrieving models.', {
-            code: 'FETCH_MODELS_FAILED',
-            status: (error as any).status || 500
-          });
+          // throw new CustomError('Error retrieving models.', {
+          //   code: 'FETCH_MODELS_FAILED',
+          //   status: (error as any).status || 500
+          // });
         } else {
           console.error('Unexpected error type:', error);
           throw new CustomError('Unknown error occurred.', {
